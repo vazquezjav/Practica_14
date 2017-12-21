@@ -150,8 +150,8 @@ public class GestionRevista {
 				file.seek((tm - 1) * 21);
 				file.writeUTF(nombreR);
 				file.writeUTF(editorial);
-				file.writeInt(codigo);
-				file.seek(0);
+					file.writeInt(codigo);
+					file.seek(0);
 				file.close();
 			} catch (Exception e) {
 				throw new Exception("Error al escribir el archivo.");
