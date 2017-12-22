@@ -44,7 +44,7 @@ public class MiVentana extends JFrame implements ActionListener {
 	private GestionDepartamento gd;
 	private GestionPaciente gpa;
 
-	public MiVentana() {
+	public MiVentana() throws Exception {
 		initComplement();
 		gr = new GestionRevista();
 		gd = new GestionDepartamento();

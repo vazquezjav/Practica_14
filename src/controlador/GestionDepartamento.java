@@ -12,29 +12,41 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.EOFException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 import modelo.departamento.Departamento;
 import modelo.departamento.Empleado;
 import modelo.departamento.Empresa;
-import modelo.revista.Articulo;
-import modelo.revista.Autor;
-import modelo.revista.Revista;
-
+import utilidades.Texto;
 public class GestionDepartamento {
 	private List<Empresa> empresas;
 	private List<Departamento> departamentos;
 	private List<Empleado> empleados;
-	private String pathEmpresa = "PracticaBinario/src/archivos/Empresas.dat";
-	private String pathDepartamento = "PracticaBinario/src/archivos/Departamentos.dat";
+	private String pathEmpresa = "Practica_14/src/archivos/Empresas.dat";
+	private String pathDepartamento = "Practica_14/src/archivos/Departamentos.dat";
+	private int TAMANO_REG=75 ;
+	
+	public GestionDepartamento() throws Exception{
+//		empresas = new ArrayList<Empresa>();
+//		departamentos = new ArrayList<Departamento>();
+//		empleados = new ArrayList<Empleado>();
+		cargarDatosDepartamento();
+	}
 
-	public GestionDepartamento() {
-		empresas = new ArrayList<Empresa>();
-		departamentos = new ArrayList<Departamento>();
-		empleados = new ArrayList<Empleado>();
+	private void  cargarDatosDepartamento() throws Exception {
+		try {
+			departamentos = leerDepartamento();
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new Exception("Error recuperar datos de archivo");
+		}
 	}
 //metodo para agragar datos del departamento y de el trabajador
-	public void agregarDepartamento(String nombreEm, String apellidoEm, String cedula, String nombreDepa, String codigo) {
-		try {
+	public void agregarDepartamento(String nombreEm, String apellidoEm, String cedula, String nombreDepa, String codigo,int nreg) throws Exception {
+	
 			Empleado em = new Empleado();
 			em.setNombreEm(nombreEm);
 			em.setApellidoEm(apellidoEm);
@@ -46,21 +58,25 @@ public class GestionDepartamento {
 			depa.setCodigo(codigo);
 			depa.setEmpleados(em);
 			departamentos.add(depa);
-
-			FileOutputStream file = new FileOutputStream(pathDepartamento, true);
-			DataOutputStream escr = new DataOutputStream(file);
-			escr.writeUTF(nombreEm);
-			escr.writeUTF(apellidoEm);
-			escr.writeUTF(cedula);
-			escr.writeUTF(nombreDepa);
-			escr.writeUTF(codigo);
-		//	escr.writeUTF(em);
-			escr.close();
-			file.close();
-
-		} catch (Exception e) {
-		}
+			try {
+				if(nreg>0) {
+					editarDepartamentoArchivo(nreg,depa,em);
+					cargarDatosDepartamento();
+				}else{
+					agregarDepartamento(nombreEm,  apellidoEm, cedula,  nombreDepa,  codigo, nreg);
+					departamentos.add(depa);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new Exception("Error al guardar datos, error en archivo");
+			}
+			
 	}
+	
+	public Departamento getPersonaMemoria(int nreg) {
+		return departamentos.get(nreg-1);
+	}
+	
 //metodo para agragar empresa
 	public void agregarEmpresa(String nombre, String ruc, String direccion, Departamento departamento) {
 		try {
@@ -142,40 +158,104 @@ public class GestionDepartamento {
 		return empleados;
 	}
 public List<Departamento> leerDepartamento() throws IOException {
-		
-		String aux = "";
-		FileInputStream lec = null;
-		DataInputStream entrada = null;
-		try {
-			String ruta = pathEmpresa;
-			String line = "";
-			lec = new FileInputStream(ruta);
-			entrada = new DataInputStream(lec);
-			while (true) {
-				String nombreEm = entrada.readUTF();
-				String apellidoEm = entrada.readUTF();
-				String cedula = entrada.readUTF();
-				String nombredepa = entrada.readUTF();
-				String codigo= entrada.readUTF();
-				Empleado em=new Empleado();
-				em.setNombreEm(nombreEm);
-				em.setApellidoEm(apellidoEm);
-				em.setCedula(cedula);
-				Departamento depa=new Departamento();
-				depa.setNombredepa(nombredepa);
-				depa.setCodigo(codigo);
-				depa.setEmpleados(em);
-				departamentos.add(depa);
+	departamentos = new ArrayList<Departamento>();
+	empleados = new ArrayList<Empleado>();
+	RandomAccessFile out = new RandomAccessFile(pathDepartamento, "rw");
+	try {
+		while(true) {
+			String nombreEm = out.readUTF();
+			String apellidoEm = out.readUTF();
+			String cedula = out.readUTF();
+			String nombreDepa = out.readUTF();
+			String codigo = out.readUTF();
+			Empleado em = new Empleado();
+			em.setNombreEm(nombreEm);
+			em.setApellidoEm(apellidoEm);
+			em.setCedula(cedula);
+			empleados.add(em);
 
-			}
-
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}finally {
-			entrada.close();
+			Departamento depa = new Departamento();
+			depa.setNombredepa(nombreDepa);
+			depa.setCodigo(codigo);
+			depa.setEmpleados(em);
+			departamentos.add(depa);
 		}
+	}catch(EOFException e){
+		System.out.println("Fin de archivo");
+	}
 		return departamentos;
 	}
+public Departamento getPersonaArchivo(int nreg) throws IOException {
+	RandomAccessFile out = new RandomAccessFile(pathDepartamento, "rw");
+	int pos = (nreg -1) *  TAMANO_REG;
+	out.seek(pos);
+	
+	String nombreEm = out.readUTF();
+	String apellidoEm = out.readUTF();
+	String cedula = out.readUTF();
+	String nombreDepa = out.readUTF();
+	String codigo = out.readUTF();
+	
+	Empleado em = new Empleado();
+	em.setNombreEm(nombreEm);
+	em.setApellidoEm(apellidoEm);
+	em.setCedula(cedula);
+	empleados.add(em);
+
+	Departamento depa = new Departamento();
+	depa.setNombredepa(nombreDepa);
+	depa.setCodigo(codigo);
+	depa.setEmpleados(em);
+	departamentos.add(depa);
+	return depa;
+}
+private void guardarDepartamentoArchivo(Departamento depa,Empleado em) throws IOException {
+	RandomAccessFile out = new RandomAccessFile(pathDepartamento, "rw");
+	out.seek(out.length());
+	out.writeUTF(Texto.tamano(em.getNombreEm(), 15));
+	out.writeUTF(Texto.tamano(em.getApellidoEm(), 15));
+	out.writeUTF(Texto.tamano(em.getCedula(), 10));	
+	out.writeUTF(Texto.tamano(depa.getNombredepa(), 15));
+	out.writeUTF(Texto.tamano(depa.getCodigo(), 10));	
+	out.close();
+}
+public void editarDepartamentoArchivo(int nreg,Departamento depa,Empleado em) throws IOException {
+	RandomAccessFile out = new RandomAccessFile(pathDepartamento, "rw");
+	int pos = (nreg -1) *  TAMANO_REG;
+	out.seek(pos);
+	out.writeUTF(Texto.tamano(em.getNombreEm(), 15));
+	out.writeUTF(Texto.tamano(em.getApellidoEm(), 15));
+	out.writeUTF(Texto.tamano(em.getCedula(), 10));	
+	out.writeUTF(Texto.tamano(depa.getNombredepa(), 15));
+	out.writeUTF(Texto.tamano(depa.getCodigo(), 10));	
+	out.close();
+}
+public void eliminarDepartamentoArchivo(int nreg) throws IOException {
+	RandomAccessFile out = new RandomAccessFile(pathDepartamento, "rw");		
+	try {
+		while(true){
+			int posN = (nreg) *  TAMANO_REG;
+			out.seek(posN);
+			String nombreEm = out.readUTF();
+			String apellidoEm = out.readUTF();
+			String cedula = out.readUTF();
+			String nombreDepa = out.readUTF();
+			String codigo = out.readUTF();
+			
+			int pos = (nreg -1) *  TAMANO_REG;
+			out.seek(pos);
+			out.writeUTF(nombreEm);
+			out.writeUTF(apellidoEm);
+			out.writeUTF(cedula);
+			out.writeUTF(nombreDepa);
+			out.writeUTF(codigo);
+			nreg ++;
+		}
+	}catch(EOFException e){
+		System.out.println("Fin de archivo");
+		out.setLength(out.length() - TAMANO_REG);
+	}
+}
 	
 public List<Empresa> leerEmpresa() throws IOException {
 	

@@ -29,12 +29,16 @@ import modelo.departamento.Empresa;
 
 public class VisDepartamento extends JInternalFrame implements ActionListener {
 	private JTextField txtNombreEm;
+	private JTextField txtRgn;
 	private JTextField txtApellidoEm;
 	private JTextField txtCedula;
 	private JTextField txtNombreDepa;
 	private JTextField txtCodigo;
 	private JTextArea txtListado;
 	private JButton guardar;
+	private JButton editar;
+	private JButton eliminar;
+	private JButton actualizar;
 	private JButton limpiar;
 	private JButton salir;
 	private GestionDepartamento gd;
@@ -56,6 +60,7 @@ public class VisDepartamento extends JInternalFrame implements ActionListener {
 		JPanel dato = new JPanel();
 		dato.setLayout(gridbad);
 		txtNombreEm = new JTextField(10);
+		txtRgn = new JTextField(10);
 		txtCedula = new JTextField(10);
 		txtNombreDepa = new JTextField(10);
 		txtListado = new JTextArea(20, 25);
@@ -130,6 +135,20 @@ public class VisDepartamento extends JInternalFrame implements ActionListener {
 		gbc.fill = 1;
 		gridbad.setConstraints(txtCodigo, gbc);
 		dato.add(txtCodigo);
+		JLabel tex6 = new JLabel("posicion");
+		gbc.gridx = 0;
+		gbc.gridy = 5;
+		gbc.fill = 1;
+		gbc.weightx = 1.0;
+		gridbad.setConstraints(tex6, gbc);
+		dato.add(tex6);
+		txtRgn = new JTextField(10);
+		gbc.gridx = 1;
+		gbc.gridy = 5;
+		gbc.weightx = 1.0;
+		gbc.fill = 1;
+		gridbad.setConstraints(txtRgn, gbc);
+		dato.add(txtRgn);
 		dato.setBorder(BorderFactory.createTitledBorder("DATOS DEL DEPARTAMETNO"));
 		cp.add(dato, BorderLayout.CENTER);
 		JPanel dato3 = new JPanel();
@@ -177,6 +196,33 @@ public class VisDepartamento extends JInternalFrame implements ActionListener {
 		boton4.addActionListener(this);
 		boton4.setActionCommand("btnListar");
 		dato2.add(boton4);
+		JButton boton5 = new JButton("Editar");
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weightx = 1.0;
+		gbc.gridx = 5;
+		gbc.gridy = 3;
+		gbc.fill = 1;
+		boton5.addActionListener(this);
+		boton5.setActionCommand("btnEditar");
+		dato2.add(boton5);
+		JButton boton6 = new JButton("Actualizar");
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weightx = 1.0;
+		gbc.gridx = 5;
+		gbc.gridy = 3;
+		gbc.fill = 1;
+		boton6.addActionListener(this);
+		boton6.setActionCommand("btnActualizar");
+		dato2.add(boton6);
+		JButton boton7 = new JButton("Eliminar");
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weightx = 1.0;
+		gbc.gridx = 5;
+		gbc.gridy = 3;
+		gbc.fill = 1;
+		boton7.addActionListener(this);
+		boton7.setActionCommand("btnEliminar");
+		dato2.add(boton7);
 		dato.setBorder(BorderFactory.createTitledBorder(""));
 		cp.add(dato2, BorderLayout.SOUTH);
 	}
@@ -200,13 +246,44 @@ public class VisDepartamento extends JInternalFrame implements ActionListener {
 		case "btnListar":
 			listar();
 			break;
+		case "btnEliminar":
+			eliminar();
+			break;
+		case "btnActualizar":
+			actualizar();
+			break;
+		case "btnEditar":
+			editar();
+			break;
 		default:
 			break;
 		}
 	}
 
+	private void editar() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void actualizar() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void eliminar() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void guardar() {
 		// TODO Auto-generated method stub
+		int rgn=0;
+		try {
+		rgn = Integer.parseInt(txtRgn.getText());
+		}catch (Exception e) {
+			e.printStackTrace();
+			rgn = 0;
+		}
 		String nombreEm = txtNombreEm.getText();
 		String apellidoEm = txtApellidoEm.getText();
 		String cedula = txtCedula.getText();
@@ -215,7 +292,7 @@ public class VisDepartamento extends JInternalFrame implements ActionListener {
 		try {
 			if (gd.isEsenci2(nombreEm, apellidoEm, cedula, nombreDepa, codigo)) {
 				if (gd.isCedulaValida(cedula)) {
-					gd.agregarDepartamento(nombreEm, apellidoEm, cedula, nombreDepa, codigo);
+					gd.agregarDepartamento(nombreEm, apellidoEm, cedula, nombreDepa, codigo,rgn);
 					limpiar();
 //					leer();
 					listar();
